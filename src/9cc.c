@@ -134,12 +134,14 @@ Node *new_node_num(int val)
 /*
 生成規則
 expr = num | ("+" mul | "-" mul)*
-mul = primary | ("*" primary | "/" primary)*
+mul = primary | ("*" unary | "/" unary)*
+unary = ("+" | "-")? primary
 primary = num | "(" expr ")"
 */
 
 Node *expr();
 Node *mul();
+Node *unary();
 Node *primary();
 
 Node *primary()
@@ -154,6 +156,20 @@ Node *primary()
 
     // それ以外は数字のはず
     return new_node_num(expect_number());
+}
+
+Node *unary()
+{
+    if (consume('+'))
+    {
+        return primary();
+    }
+    if (consume('-'))
+    {
+        return new_node(ND_SUB, new_node_num(0), primary());
+    }
+
+    return primary();
 }
 
 Node *mul()
