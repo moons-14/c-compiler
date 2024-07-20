@@ -131,6 +131,13 @@ Node *new_node_num(int val)
     return node;
 }
 
+/*
+生成規則
+expr = num | ("+" mul | "-" mul)*
+mul = primary | ("*" primary | "/" primary)*
+primary = num | "(" expr ")"
+*/
+
 Node *expr();
 Node *mul();
 Node *primary();
