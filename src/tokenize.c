@@ -32,6 +32,18 @@ bool expect(char *op)
     token = token->next;
 }
 
+// 次のトークンがidentの時はトークンを一つ進めてそのidentを返す。それ以外はfalseを返す
+Token *consume_ident()
+{
+    if (token->kind != TK_IDENT)
+    {
+        return NULL;
+    }
+    Token *ident = token;
+    token = token->next;
+    return ident;
+}
+
 // 次のトークンが数字の場合、トークンを一つ進めてその数字を返す。それ以外はエラーを出す
 int expect_number()
 {
@@ -70,6 +82,13 @@ Token *tokenize(char *p)
         if (strchr("+-*/()><>", *p))
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
+            continue;
+        }
+
+        if ('a' <= *p && *p <= 'z')
+        {
+            cur = new_token(TK_IDENT, cur, p++, 1);
+            cur->len = 1;
             continue;
         }
 

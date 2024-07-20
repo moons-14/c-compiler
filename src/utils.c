@@ -20,3 +20,8 @@ bool strEqual(char *p, char *q)
 {
     return memcmp(p, q, strlen(q)) == 0;
 }
+
+bool at_eof()
+{
+    return token->kind == TK_EOF;
+}

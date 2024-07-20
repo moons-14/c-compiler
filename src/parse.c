@@ -19,19 +19,56 @@ Node *new_node_num(int val)
 
 /*
 生成規則
-expr = equality
+program = stmt*
+stmt = expr ";"
+expr = assign
+assign = equality ("=" assign)?
 equality = relational ("==" relational | "!=" relational)*
 relational = add ("<" add | ">" add | "<=" add | ">=" add)*
 add = num ("+" mul | "-" mul)*
 mul = unary ("*" unary | "/" unary)*
 unary = ("+" | "-")? primary
-primary = num | "(" expr ")"
+primary = num | ident | "(" expr ")"
 */
 
-// expr = equality
+Node *code[100];
+
+// program = stmt*
+Node *program()
+{
+    int i = 0;
+    while (!at_eof())
+    {
+        code[i++] = stmt();
+    }
+    code[i] = NULL;
+}
+
+// stmt = expr ";"
+Node *stmt()
+{
+    Node *node = expr();
+    expect(";");
+    return node;
+}
+
+// expr = assign
 Node *expr()
 {
-    return equality();
+    return assign();
+}
+
+// assign = equality ("=" assign)?
+Node *assign()
+{
+    Node *node = equality();
+    for (;;)
+    {
+        if (consume("="))
+            node = new_node(ND_ASSIGN, node, assign());
+        else
+            return node;
+    }
 }
 
 // equality = relational ("==" relational | "!=" relational)*
@@ -117,7 +154,7 @@ Node *unary()
     return primary();
 }
 
-// primary = num | "(" expr ")"
+// primary = num | ident | "(" expr ")"
 Node *primary()
 {
     // 次のトークンが"("なら、"("+expr+")"のはず
@@ -125,6 +162,15 @@ Node *primary()
     {
         Node *node = expr();
         expect(")");
+        return node;
+    }
+
+    Token *tok = consume_ident();
+    if (tok)
+    {
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        node->offset = (tok->str[0] - 'a' + 1) * 8;
         return node;
     }
 
