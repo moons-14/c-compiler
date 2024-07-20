@@ -131,6 +131,10 @@ Node *new_node_num(int val)
     return node;
 }
 
+Node *expr();
+Node *mul();
+Node *primary();
+
 Node *primary()
 {
     // 次のトークンが"("なら、"("+expr+")"のはず
@@ -175,6 +179,40 @@ Node *expr()
     }
 }
 
+void gen(Node *node)
+{
+    if (node->kind == ND_NUM)
+    {
+        printf("    push %d\n", node->val);
+        return;
+    }
+
+    gen(node->lhs);
+    gen(node->rhs);
+
+    printf("    pop rdi\n");
+    printf("    pop rax\n");
+
+    switch (node->kind)
+    {
+    case ND_ADD:
+        printf("    add rax, rdi\n");
+        break;
+    case ND_SUB:
+        printf("    sub rax, rdi\n");
+        break;
+    case ND_MUL:
+        printf("    imul rax, rdi\n");
+        break;
+    case ND_DIV:
+        printf("    cqo\n");
+        printf("    idiv rdi\n");
+        break;
+    }
+
+    printf("    push rax\n");
+}
+
 // 文字列*pをトークナイズして返す
 Token *tokenize(char *p)
 {
@@ -191,7 +229,7 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (*p == '+' || *p == '-')
+        if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')')
         {
             cur = new_token(TK_RESERVED, cur, p++);
             continue;
@@ -225,24 +263,15 @@ int main(int argc, char **argv)
     // トークナイズする
     token = tokenize(argv[1]);
 
+    Node *node = expr();
+
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
     printf("main:\n");
 
-    // 最初は必ず数字
-    printf("    mov rax, %d\n", expect_number());
+    gen(node);
 
-    while (!at_eof())
-    {
-        if (consume('+'))
-        {
-            printf("    add rax, %d\n", expect_number());
-        }
-
-        expect('-');
-        printf("    sub rax, %d\n", expect_number());
-    }
-
+    printf("    pop rax\n");
     printf("    ret\n");
     return 0;
 }
