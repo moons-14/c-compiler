@@ -63,6 +63,7 @@ extern Node *code[100];
 
 // === utils.c ===
 void error_at(char *loc, char *fmt, ...);
+void error(char *fmt, ...);
 bool strEqual(char *p, char *q);
 bool at_eof();
 
