@@ -30,4 +30,8 @@ assert 47 '5+6*7'
 assert 15 '5*(9-6)'
 assert 4 '(3+5)/2'
 
+# 単項のプラマイを許可
+assert 60 '12*+5'
+assert 75 '-5*-5*3'
+
 echo OK
