@@ -1,9 +1,16 @@
 CFLAGS=-std=c11 -g -static
+SRCS=$(wildcard ./src/*.c)
+OBJS=$(patsubst ./src/%.c,./build/%.o,$(SRCS))
 
-9cc: ./src/9cc.c
-		$(CC) -o ./build/9cc ./src/9cc.c $(LDFLAGS)
+9cc: $(OBJS)
+		$(CC) -o ./build/9cc $(OBJS) $(LDFLAGS)
 
-test: ./src/9cc.c
+$(OBJS): ./src/9cc.h
+
+./build/%.o: ./src/%.c
+		$(CC) $(CFLAGS) -c $< -o $@
+
+test: ./build/9cc
 		./scripts/test.sh
 
 clean:
