@@ -18,6 +18,11 @@ assert(){
 
 assert 0 0
 assert 42 42
+
+# 足し引きできるように
 assert 21 "5+20-4"
+
+# トークン化
+assert 41 " 12 + 34 - 5 "
 
 echo OK
