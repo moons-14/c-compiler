@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}",
             "args": [
-                "5+20w-4"
+                "5+20-4"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
