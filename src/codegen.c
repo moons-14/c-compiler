@@ -14,23 +14,23 @@ void gen(Node *node)
 {
     switch (node->kind)
     {
-    case ND_RETURN:
+    case ND_RETURN: // return文の場合
         gen(node->lhs);
         printf("    pop rax\n");
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
         return;
-    case ND_NUM:
+    case ND_NUM:    // 数字だけの場合
         printf("    push %d\n", node->val);
         return;
-    case ND_LVAR:
+    case ND_LVAR:   // ローカル変数の場合
         gen_lval(node);
         printf("    pop rax\n");
         printf("    mov rax, [rax]\n");
         printf("    push rax\n");
         return;
-    case ND_ASSIGN:
+    case ND_ASSIGN: // 代入の場合
         gen_lval(node->lhs);
         gen(node->rhs);
 
@@ -38,6 +38,25 @@ void gen(Node *node)
         printf("    pop rax\n");
         printf("    mov [rax], rdi\n");
         printf("    push rdi\n");
+        return;
+    case ND_IF:     // if文の場合
+        gen(node->cond);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lend%03d\n", node->label);
+        gen(node->then);
+        printf(".Lend%03d:\n", node->label);
+        return;
+    case ND_IF_ELSE: // if-else文の場合
+        gen(node->cond);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lelse%03d\n", node->label);
+        gen(node->then);
+        printf("    jmp .Lend%03d\n", node->label);
+        printf(".Lelse%03d:\n", node->label);
+        gen(node->els);
+        printf(".Lend%03d:\n", node->label);
         return;
     }
 

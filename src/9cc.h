@@ -14,6 +14,8 @@ typedef enum
     TK_IDENT,       // 識別子
     TK_NUM,         // 数字
     TK_RETURN,      // return
+    TK_IF,          // if
+    TK_ELSE,        // else
     TK_EOF,         // 入力の終わり
 } TokenKind;
 
@@ -45,6 +47,8 @@ typedef enum
     ND_SETL,    // <
     ND_NUM,     // 整数
     ND_LVAR,    // ローカル変数
+    ND_IF,      // if
+    ND_IF_ELSE, // if-else
     ND_RETURN,  // return
 } NodeKind;
 
@@ -58,6 +62,10 @@ struct Node
     Node *rhs;      // 右辺 (right-hand side)
     int val;        // kindがND_NUMの場合のみ、その数字
     int offset;     // kindがND_LVARの場合のみ、RBPとの差異
+    Node *cond;     // kindがND_IFかND_IF_ELSEの場合のみ、条件
+    Node *then;     // kindがND_IFかND_IF_ELSEの場合のみ、実行する式
+    Node *els;      // kindがND_IF_ELSEの場合のみ、else後の実行する式
+    int label;      // 通し番号
 };
 
 // コード
@@ -106,8 +114,12 @@ bool is_ident1(char c);
 bool is_ident2(char c);
 
 // === parse.c ===
+extern int nodeLabelCount;
+Node *new_node_by_kind(NodeKind kind);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Node *new_node_if(Node *cond, Node *then);
+Node *new_node_if_else(Node *cond, Node *then, Node *els);
 void init_lvar();
 void *program();
 Node *stmt();

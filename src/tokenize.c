@@ -122,6 +122,22 @@ Token *tokenize(char *p)
             continue;
         }
 
+        // ifの場合
+        if (strncmp(p, "if", 2) == 0 && !is_alnum(p[2]))
+        {
+            cur = new_token(TK_IF, cur, p, 2);
+            p += 2;
+            continue;
+        }
+
+        // elseの場合
+        if (strncmp(p, "else", 4) == 0 && !is_alnum(p[4]))
+        {
+            cur = new_token(TK_ELSE, cur, p, 4);
+            p += 4;
+            continue;
+        }
+
         // 変数を検出した場合
         if (is_ident_start(*p))
         {

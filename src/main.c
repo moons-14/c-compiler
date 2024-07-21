@@ -23,6 +23,7 @@ int main(int argc, char **argv)
     init_lvar();
     // パースする。結果はcodeに入る
     program();
+    
 
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");

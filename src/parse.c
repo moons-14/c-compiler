@@ -1,9 +1,17 @@
 #include "9cc.h"
 
-Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
+int nodeLabelCount = 0;
+Node *new_node_by_kind(NodeKind kind)
 {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
+    node->label = nodeLabelCount++;
+    return node;
+}
+
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
+{
+    Node *node = new_node_by_kind(kind);
     node->lhs = lhs;
     node->rhs = rhs;
     return node;
@@ -11,9 +19,25 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
 
 Node *new_node_num(int val)
 {
-    Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_NUM;
+    Node *node = new_node_by_kind(ND_NUM);
     node->val = val;
+    return node;
+}
+
+Node *new_node_if(Node *cond, Node *then)
+{
+    Node *node = new_node_by_kind(ND_IF);
+    node->cond = cond;
+    node->then = then;
+    return node;
+}
+
+Node *new_node_if_else(Node *cond, Node *then, Node *els)
+{
+    Node *node = new_node_by_kind(ND_IF_ELSE);
+    node->cond = cond;
+    node->then = then;
+    node->els = els;
     return node;
 }
 
@@ -40,7 +64,9 @@ LVar *find_lvar(Token *tok)
 /*
 生成規則
 program = stmt*
-stmt = expr ";" | "return" expr ";"
+stmt = expr ";"
+        | "return" expr ";"
+        | "if" "(" expr ")" stmt ("else" stmt)?
 expr = assign
 assign = equality ("=" assign)?
 equality = relational ("==" relational | "!=" relational)*
@@ -64,15 +90,33 @@ void *program()
     code[i] = NULL;
 }
 
-// stmt = expr ";" | "return" expr ";"
+// stmt = expr ";"
+//         | "return" expr ";"
+//         | "if" "(" expr ")" stmt ("else" stmt)?
 Node *stmt()
 {
     Node *node;
     if (consume_token_kind(TK_RETURN))
     {
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_RETURN;
+        node = new_node_by_kind(ND_RETURN);
         node->lhs = expr();
+    }
+    else if (consume_token_kind(TK_IF))
+    {
+        expect("(");
+        Node *cond = expr();
+        expect(")");
+        Node *then = stmt();
+        Node *els = NULL;
+        if (consume_token_kind(TK_ELSE))
+        {
+            node = new_node_if_else(cond, then, stmt());
+        }
+        else
+        {
+            node = new_node_if(cond, then);
+        }
+        return node;
     }
     else
     {
@@ -81,7 +125,6 @@ Node *stmt()
 
     if (!consume(";"))
         error("';'ではないトークンです");
-
     return node;
 }
 
@@ -201,8 +244,7 @@ Node *primary()
     Token *tok = consume_ident();
     if (tok)
     {
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
+        Node *node = new_node_by_kind(ND_LVAR);
 
         LVar *lvar = find_lvar(tok);
 

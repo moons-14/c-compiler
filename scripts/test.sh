@@ -65,4 +65,9 @@ assert 40 'foo=20;bar=4-+2;foo*bar;'
 assert 24 'foo=20;bar=4-+2;return foo+bar*2;'
 assert 5 'foo=20;bar=4-+2;return foo/4;return foo*bar*2;'
 
+# if,elseが使えるように
+assert 10 'if(1==1) return 10; return 20;'
+assert 20 'if(1==0) return 10; return 20;'
+assert 20 'if(1==0) return 10; else return 20;'
+
 echo OK
