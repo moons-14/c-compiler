@@ -5,7 +5,9 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int stl)
 {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
-    tok->str = str;
+    char *s = calloc(stl + 1, sizeof(char));
+    strncpy(s, str, stl);
+    tok->str = s;
     tok->len = stl;
     cur->next = tok;
     return tok;
@@ -118,7 +120,7 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (strchr("+-*/()><>=;{}", *p))
+        if (strchr("+-*/()><>=;{},", *p))
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;

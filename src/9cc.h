@@ -10,15 +10,15 @@
 // トークンの種類
 typedef enum
 {
-    TK_RESERVED,    // 記号
-    TK_IDENT,       // 識別子
-    TK_NUM,         // 数字
-    TK_RETURN,      // return
-    TK_IF,          // if
-    TK_ELSE,        // else
-    TK_WHILE,       // while
-    TK_FOR,         // for
-    TK_EOF,         // 入力の終わり
+    TK_RESERVED, // 記号
+    TK_IDENT,    // 識別子
+    TK_NUM,      // 数字
+    TK_RETURN,   // return
+    TK_IF,       // if
+    TK_ELSE,     // else
+    TK_WHILE,    // while
+    TK_FOR,      // for
+    TK_EOF,      // 入力の終わり
 } TokenKind;
 
 typedef struct Token Token;
@@ -38,23 +38,24 @@ extern Token *token;
 // ASTのノードの種類
 typedef enum
 {
-    ND_ADD,     // +
-    ND_SUB,     // -
-    ND_MUL,     // *
-    ND_DIV,     // /
-    ND_ASSIGN,  // =
-    ND_SETE,    // ==
-    ND_SETNE,   // !=
-    ND_SETLE,   // <=
-    ND_SETL,    // <
-    ND_NUM,     // 整数
-    ND_LVAR,    // ローカル変数
-    ND_IF,      // if
-    ND_IF_ELSE, // if-else
-    ND_WHILE,   // while
-    ND_FOR,     // for
-    ND_RETURN,  // return
-    ND_BLOCK,   // { ... }
+    ND_ADD,       // +
+    ND_SUB,       // -
+    ND_MUL,       // *
+    ND_DIV,       // /
+    ND_ASSIGN,    // =
+    ND_SETE,      // ==
+    ND_SETNE,     // !=
+    ND_SETLE,     // <=
+    ND_SETL,      // <
+    ND_NUM,       // 整数
+    ND_LVAR,      // ローカル変数
+    ND_IF,        // if
+    ND_IF_ELSE,   // if-else
+    ND_WHILE,     // while
+    ND_FOR,       // for
+    ND_RETURN,    // return
+    ND_BLOCK,     // { ... }
+    ND_CALL_FUNC, // 関数呼び出し
 } NodeKind;
 
 typedef struct Node Node;
@@ -62,18 +63,19 @@ typedef struct Node Node;
 // ASTのノードの型
 struct Node
 {
-    NodeKind kind;  // ノードの型
-    Node *lhs;      // 左辺 (left-hand side)
-    Node *rhs;      // 右辺 (right-hand side)
-    int val;        // kindがND_NUMの場合のみ、その数字
-    int offset;     // kindがND_LVARの場合のみ、RBPとの差異
-    Node *cond;     // kindがND_IFかND_IF_ELSE, ND_WHILEの場合のみ、条件
-    Node *then;     // kindがND_IFかND_IF_ELSE, ND_WHILEの場合のみ、実行する式
-    Node *els;      // kindがND_IF_ELSEの場合のみ、else後の実行する式
-    Node *init;     // kindがND_FORの場合のみ、初期化
-    Node *inc;      // kindがND_FORの場合のみ、インクリメント
-    Node *next;     // kindがND_BLOCKの場合のみ、実行する式 ネストして複数の式を持つ
-    int label;      // 通し番号
+    NodeKind kind; // ノードの型
+    Node *lhs;     // 左辺 (left-hand side)
+    Node *rhs;     // 右辺 (right-hand side)
+    int val;       // kindがND_NUMの場合のみ、その数字
+    int offset;    // kindがND_LVARの場合のみ、RBPとの差異
+    Node *cond;    // kindがND_IFかND_IF_ELSE, ND_WHILEの場合のみ、条件
+    Node *then;    // kindがND_IFかND_IF_ELSE, ND_WHILEの場合のみ、実行する式
+    Node *els;     // kindがND_IF_ELSEの場合のみ、else後の実行する式
+    Node *init;    // kindがND_FORの場合のみ、初期化
+    Node *inc;     // kindがND_FORの場合のみ、インクリメント
+    Node *next;    // kindがND_BLOCKの場合、実行する式 ネストして複数の式を持つ kindがND_CALL_FUNCの場合、引数
+    char *name;    // kindがND_CALL_FUNCの場合のみ、関数名
+    int label;     // 通し番号
 };
 
 // コード
@@ -93,7 +95,6 @@ struct LVar
 
 extern LVar *locals;
 
-
 // === utils.c ===
 void error_at(char *loc, char *fmt, ...);
 void error(char *fmt, ...);
@@ -107,6 +108,7 @@ extern char *user_input;
 
 // === codegen.c ===
 void gen(Node *node);
+extern int label_count;
 
 // === tokenize.c ===
 Token *new_token(TokenKind kind, Token *cur, char *str, int stl);

@@ -10,6 +10,7 @@ void gen_lval(Node *node)
     printf("    push rax\n");
 }
 
+int label_count;
 void gen(Node *node)
 {
     switch (node->kind)
@@ -98,6 +99,61 @@ void gen(Node *node)
                 printf("    pop rax\n");
             }
         }
+        return;
+    case ND_CALL_FUNC: // 関数呼び出しの場合
+        for (Node *n = node->next; n; n = n->next)
+        {
+            gen(n);
+        }
+        // 引数の値をRDI、RSI、RDX、RCX、R8、R9のレジストリに引数をそれぞれ入れる 6以上ある場合は無視 6個に満たない場合のことも考慮
+        int i = 0;
+        for (Node *n = node->next; n; n = n->next)
+        {
+            if (i == 0)
+            {
+                printf("    pop rdi\n");
+            }
+            else if (i == 1)
+            {
+                printf("    pop rsi\n");
+            }
+            else if (i == 2)
+            {
+                printf("    pop rdx\n");
+            }
+            else if (i == 3)
+            {
+                printf("    pop rcx\n");
+            }
+            else if (i == 4)
+            {
+                printf("    pop r8\n");
+            }
+            else if (i == 5)
+            {
+                printf("    pop r9\n");
+            }
+            i++;
+        }
+
+         // rspを16の倍数にする
+        printf("    mov rax, rsp\n");
+        printf("    and rax, 15\n");
+        printf("    jz .L.call.%d\n", label_count);
+        printf("    push rax\n");
+        printf(".L.call.%d:\n", label_count);
+        
+        printf("    call %s\n", node->name);
+        printf("    push rax\n");
+
+        // スタックポインタを元に戻す（必要な場合）
+        printf("    mov rax, rsp\n");
+        printf("    and rax, 15\n");
+        printf("    jz .L.end.%d\n", label_count);
+        printf("    add rsp, 8\n");
+        printf(".L.end.%d:\n", label_count);
+
+        label_count++;
         return;
     }
 

@@ -77,7 +77,7 @@ relational = add ("<" add | ">" add | "<=" add | ">=" add)*
 add = num ("+" mul | "-" mul)*
 mul = unary ("*" unary | "/" unary)*
 unary = ("+" | "-")? primary
-primary = num | ident | "(" expr ")"
+primary = num | ident ("(" expr* ")")? | "(" expr ")"
 */
 
 Node *code[100];
@@ -277,7 +277,7 @@ Node *unary()
     return primary();
 }
 
-// primary = num | ident | "(" expr ")"
+// primary = num | ident ("(" (assign ("," assign)*)? ")")? | "(" expr ")"
 Node *primary()
 {
     // 次のトークンが"("なら、"("+expr+")"のはず
@@ -291,6 +291,25 @@ Node *primary()
     Token *tok = consume_ident();
     if (tok)
     {
+        if (consume("("))
+        {
+            Node *node = new_node_by_kind(ND_CALL_FUNC);
+            node->name = tok->str;
+            if (!consume(")"))
+            {
+                Node *head = assign();
+                Node *cur = head;
+                while (consume(","))
+                {
+                    cur->next = assign();
+                    cur = cur->next;
+                }
+                cur->next = NULL;
+                node->next = head;
+                expect(")");
+            }
+            return node;
+        }
         Node *node = new_node_by_kind(ND_LVAR);
 
         LVar *lvar = find_lvar(tok);
