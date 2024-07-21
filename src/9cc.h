@@ -16,6 +16,7 @@ typedef enum
     TK_RETURN,      // return
     TK_IF,          // if
     TK_ELSE,        // else
+    TK_WHILE,       // while
     TK_EOF,         // 入力の終わり
 } TokenKind;
 
@@ -49,6 +50,7 @@ typedef enum
     ND_LVAR,    // ローカル変数
     ND_IF,      // if
     ND_IF_ELSE, // if-else
+    ND_WHILE,   // while
     ND_RETURN,  // return
 } NodeKind;
 
@@ -62,8 +64,8 @@ struct Node
     Node *rhs;      // 右辺 (right-hand side)
     int val;        // kindがND_NUMの場合のみ、その数字
     int offset;     // kindがND_LVARの場合のみ、RBPとの差異
-    Node *cond;     // kindがND_IFかND_IF_ELSEの場合のみ、条件
-    Node *then;     // kindがND_IFかND_IF_ELSEの場合のみ、実行する式
+    Node *cond;     // kindがND_IFかND_IF_ELSE, ND_WHILEの場合のみ、条件
+    Node *then;     // kindがND_IFかND_IF_ELSE, ND_WHILEの場合のみ、実行する式
     Node *els;      // kindがND_IF_ELSEの場合のみ、else後の実行する式
     int label;      // 通し番号
 };

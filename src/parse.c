@@ -67,6 +67,7 @@ program = stmt*
 stmt = expr ";"
         | "return" expr ";"
         | "if" "(" expr ")" stmt ("else" stmt)?
+        | "while" "(" expr ")" stmt
 expr = assign
 assign = equality ("=" assign)?
 equality = relational ("==" relational | "!=" relational)*
@@ -93,6 +94,7 @@ void *program()
 // stmt = expr ";"
 //         | "return" expr ";"
 //         | "if" "(" expr ")" stmt ("else" stmt)?
+//         | "while" "(" expr ")" stmt
 Node *stmt()
 {
     Node *node;
@@ -116,6 +118,17 @@ Node *stmt()
         {
             node = new_node_if(cond, then);
         }
+        return node;
+    }
+    else if(consume_token_kind(TK_WHILE))
+    {
+        expect("(");
+        Node *cond = expr();
+        expect(")");
+        Node *body = stmt();
+        node = new_node_by_kind(ND_WHILE);
+        node->cond = cond;
+        node->then = body;
         return node;
     }
     else

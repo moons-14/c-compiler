@@ -58,6 +58,16 @@ void gen(Node *node)
         gen(node->els);
         printf(".Lend%03d:\n", node->label);
         return;
+    case ND_WHILE: // while文の場合
+        printf(".Lbegin%03d:\n", node->label);
+        gen(node->cond);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n");
+        printf("    je .Lend%03d\n", node->label);
+        gen(node->then);
+        printf("    jmp .Lbegin%03d\n", node->label);
+        printf(".Lend%03d:\n", node->label);
+        return;
     }
 
     gen(node->lhs);
