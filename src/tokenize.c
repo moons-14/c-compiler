@@ -11,6 +11,12 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int stl)
     return tok;
 }
 
+// トークンを進める
+void next_token()
+{
+    token = token->next;
+}
+
 // 次のトークンが期待している記号の場合のとき、注目しているトークンを一つ進めてtrue。それ以外はfalse。
 bool consume(char *op)
 {
@@ -18,7 +24,7 @@ bool consume(char *op)
     {
         return false;
     }
-    token = token->next;
+    next_token();
     return true;
 }
 
@@ -29,7 +35,7 @@ bool expect(char *op)
     {
         error_at(token->str, "'%s'ではありません", op);
     }
-    token = token->next;
+    next_token();
 }
 
 // 次のトークンがidentの時はトークンを一つ進めてそのidentを返す。それ以外はfalseを返す
@@ -40,8 +46,19 @@ Token *consume_ident()
         return NULL;
     }
     Token *ident = token;
-    token = token->next;
+    next_token();
     return ident;
+}
+
+// 次のトークンが特定の種類かどうか 特定の種類ならトークンを一つすすめてtrue それ以外はfalseを返す
+bool consume_token_kind(TokenKind kind)
+{
+    if (token->kind != kind)
+    {
+        return false;
+    }
+    next_token();
+    return true;
 }
 
 // 次のトークンが数字の場合、トークンを一つ進めてその数字を返す。それ以外はエラーを出す
@@ -52,7 +69,7 @@ int expect_number()
         error_at(token->str, "数ではありません");
     }
     int val = token->val;
-    token = token->next;
+    next_token();
     return val;
 }
 
@@ -63,7 +80,7 @@ bool is_ident_start(char c)
 }
 
 // 変数名の始め以外の文字として有効な文字であるかを判定する
-bool is_ident_others(char c)
+bool is_alnum(char c)
 {
     return is_ident_start(c) || ('0' <= c && c <= '9');
 }
@@ -97,11 +114,19 @@ Token *tokenize(char *p)
             continue;
         }
 
+        // returnの場合
+        if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6]))
+        {
+            cur = new_token(TK_RETURN, cur, p, 6);
+            p += 6;
+            continue;
+        }
+
         // 変数を検出した場合
         if (is_ident_start(*p))
         {
             char *q = p++;
-            while (is_ident_others(*p))
+            while (is_alnum(*p))
             {
                 p++;
             }

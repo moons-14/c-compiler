@@ -61,4 +61,8 @@ assert 23 'a=2-1;b=12-(-2*-3);z=1>=0;t=23;a*(b-3)+20;'
 # 複数文字の変数が使えるように
 assert 40 'foo=20;bar=4-+2;foo*bar;'
 
+# returnが使えるように
+assert 24 'foo=20;bar=4-+2;return foo+bar*2;'
+assert 5 'foo=20;bar=4-+2;return foo/4;return foo*bar*2;'
+
 echo OK

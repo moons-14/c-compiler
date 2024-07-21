@@ -13,6 +13,7 @@ typedef enum
     TK_RESERVED,    // 記号
     TK_IDENT,       // 識別子
     TK_NUM,         // 数字
+    TK_RETURN,      // return
     TK_EOF,         // 入力の終わり
 } TokenKind;
 
@@ -44,6 +45,7 @@ typedef enum
     ND_SETL,    // <
     ND_NUM,     // 整数
     ND_LVAR,    // ローカル変数
+    ND_RETURN,  // return
 } NodeKind;
 
 typedef struct Node Node;
@@ -92,10 +94,12 @@ void gen(Node *node);
 
 // === tokenize.c ===
 Token *new_token(TokenKind kind, Token *cur, char *str, int stl);
+void next_token();
 bool consume(char *op);
 bool expect(char *op);
 Token *consume_ident();
 int expect_number();
+bool consume_token_kind(TokenKind kind);
 Token *tokenize(char *p);
 LVar *find_lvar(Token *tok);
 bool is_ident1(char c);
