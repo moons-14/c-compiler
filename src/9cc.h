@@ -61,6 +61,21 @@ struct Node
 // コード
 extern Node *code[100];
 
+// ローカル変数
+typedef struct LVar LVar;
+
+// ローカル変数の型
+struct LVar
+{
+    LVar *next; // 次の変数かNULL
+    char *name; // 変数の名前
+    int len;    // 名前の長さ
+    int offset; // RBPからのオフセット
+};
+
+extern LVar *locals;
+
+
 // === utils.c ===
 void error_at(char *loc, char *fmt, ...);
 void error(char *fmt, ...);
@@ -82,11 +97,15 @@ bool expect(char *op);
 Token *consume_ident();
 int expect_number();
 Token *tokenize(char *p);
+LVar *find_lvar(Token *tok);
+bool is_ident1(char c);
+bool is_ident2(char c);
 
 // === parse.c ===
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
-Node *program();
+void init_lvar();
+void *program();
 Node *stmt();
 Node *expr();
 Node *assign();

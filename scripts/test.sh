@@ -58,4 +58,7 @@ assert 0 '1>=2;'
 assert 10 'a=2;b=8;a+b;'
 assert 23 'a=2-1;b=12-(-2*-3);z=1>=0;t=23;a*(b-3)+20;'
 
+# 複数文字の変数が使えるように
+assert 40 'foo=20;bar=4-+2;foo*bar;'
+
 echo OK

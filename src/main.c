@@ -19,6 +19,8 @@ int main(int argc, char **argv)
     // トークナイズする
     token = tokenize(argv[1]);
 
+    // ローカル変数を初期化する
+    init_lvar();
     // パースする。結果はcodeに入る
     program();
 

@@ -56,6 +56,18 @@ int expect_number()
     return val;
 }
 
+// 変数名の始めの文字として有効な文字であるかを判定する 数字は不可
+bool is_ident_start(char c)
+{
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+// 変数名の始め以外の文字として有効な文字であるかを判定する
+bool is_ident_others(char c)
+{
+    return is_ident_start(c) || ('0' <= c && c <= '9');
+}
+
 // 文字列*pをトークナイズして返す
 Token *tokenize(char *p)
 {
@@ -85,10 +97,15 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if ('a' <= *p && *p <= 'z')
+        // 変数を検出した場合
+        if (is_ident_start(*p))
         {
-            cur = new_token(TK_IDENT, cur, p++, 1);
-            cur->len = 1;
+            char *q = p++;
+            while (is_ident_others(*p))
+            {
+                p++;
+            }
+            cur = new_token(TK_IDENT, cur, q, p - q);
             continue;
         }
 

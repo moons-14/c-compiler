@@ -17,6 +17,26 @@ Node *new_node_num(int val)
     return node;
 }
 
+// ローカル変数
+LVar *locals;
+void init_lvar()
+{
+    locals = NULL;
+}
+
+// 変数を名前で検索する。見つからない場合はNULL
+LVar *find_lvar(Token *tok)
+{
+    for (LVar *var = locals; var; var = var->next)
+    {
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+        {
+            return var;
+        }
+    }
+    return NULL;
+}
+
 /*
 生成規則
 program = stmt*
@@ -34,7 +54,7 @@ primary = num | ident | "(" expr ")"
 Node *code[100];
 
 // program = stmt*
-Node *program()
+void *program()
 {
     int i = 0;
     while (!at_eof())
@@ -170,7 +190,27 @@ Node *primary()
     {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        node->offset = (tok->str[0] - 'a' + 1) * 8;
+
+        LVar *lvar = find_lvar(tok);
+
+        if (lvar)
+        {
+            node->offset = lvar->offset;
+        }
+        else
+        {
+            lvar = calloc(1, sizeof(LVar));
+            lvar->next = locals;
+            lvar->name = tok->str;
+            lvar->len = tok->len;
+            if (locals)
+                lvar->offset = locals->offset + 8;
+            else
+                lvar->offset = 8;
+            node->offset = lvar->offset;
+            locals = lvar;
+        }
+
         return node;
     }
 
