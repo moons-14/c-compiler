@@ -75,4 +75,8 @@ assert 30 'a=20;b=30;if(a>=b) return a; else return b;'
 assert 10 'a=0;while(a<10) a=a+1; return a;'
 assert 10 'a=20;while(a>10) a=a-1; return a;'
 
+# forが使えるように
+assert 10 'a=0;for(i=0;i<10;i=i+1) a=a+1; return a;'
+assert 10 'a=0;for(;a<10;) a=a+1; return a;'
+
 echo OK

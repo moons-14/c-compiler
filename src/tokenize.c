@@ -17,7 +17,7 @@ void next_token()
     token = token->next;
 }
 
-// 次のトークンが期待している記号の場合のとき、注目しているトークンを一つ進めてtrue。それ以外はfalse。
+// 次のトークンが期待している文字列の場合のとき、注目しているトークンを一つ進めてtrue。それ以外はfalse。
 bool consume(char *op)
 {
     if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, strlen(op)))
@@ -28,7 +28,17 @@ bool consume(char *op)
     return true;
 }
 
-// 次のトークンが期待している記号のときはトークンを一つ進める。それ以外はエラーを出す
+// 次のトークンが期待している文字列の時、トークンを*進めずに*trueを返す。それ以外はfalseを返す
+bool peek(char *op)
+{
+    if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, strlen(op)))
+    {
+        return false;
+    }
+    return true;
+}
+
+// 次のトークンが期待している文字列のときはトークンを一つ進める。それ以外はエラーを出す
 bool expect(char *op)
 {
     if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, strlen(op)))
@@ -143,6 +153,14 @@ Token *tokenize(char *p)
         {
             cur = new_token(TK_WHILE, cur, p, 5);
             p += 5;
+            continue;
+        }
+
+        // forの場合
+        if (strncmp(p, "for", 3) == 0 && !is_alnum(p[3]))
+        {
+            cur = new_token(TK_FOR, cur, p, 3);
+            p += 3;
             continue;
         }
 

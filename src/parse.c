@@ -68,6 +68,7 @@ stmt = expr ";"
         | "return" expr ";"
         | "if" "(" expr ")" stmt ("else" stmt)?
         | "while" "(" expr ")" stmt
+        | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 expr = assign
 assign = equality ("=" assign)?
 equality = relational ("==" relational | "!=" relational)*
@@ -95,6 +96,7 @@ void *program()
 //         | "return" expr ";"
 //         | "if" "(" expr ")" stmt ("else" stmt)?
 //         | "while" "(" expr ")" stmt
+//         | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 Node *stmt()
 {
     Node *node;
@@ -120,7 +122,7 @@ Node *stmt()
         }
         return node;
     }
-    else if(consume_token_kind(TK_WHILE))
+    else if (consume_token_kind(TK_WHILE))
     {
         expect("(");
         Node *cond = expr();
@@ -128,6 +130,24 @@ Node *stmt()
         Node *body = stmt();
         node = new_node_by_kind(ND_WHILE);
         node->cond = cond;
+        node->then = body;
+        return node;
+    }
+    else if (consume_token_kind(TK_FOR))
+    {
+        Node *init, *cond, *inc, *body;
+        expect("(");
+        init = peek(";") ? NULL : expr();
+        expect(";");
+        cond = peek(";") ? NULL : expr();
+        expect(";");
+        inc = peek(")") ? NULL : expr();
+        expect(")");
+        body = stmt();
+        node = new_node_by_kind(ND_FOR);
+        node->init = init;
+        node->cond = cond;
+        node->inc = inc;
         node->then = body;
         return node;
     }

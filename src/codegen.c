@@ -68,6 +68,27 @@ void gen(Node *node)
         printf("    jmp .Lbegin%03d\n", node->label);
         printf(".Lend%03d:\n", node->label);
         return;
+    case ND_FOR: // for文の場合
+        if (node->init)
+        {
+            gen(node->init);
+        }
+        printf(".Lbegin%03d:\n", node->label);
+        if (node->cond)
+        {
+            gen(node->cond);
+            printf("    pop rax\n");
+            printf("    cmp rax, 0\n");
+            printf("    je .Lend%03d\n", node->label);
+        }
+        gen(node->then);
+        if (node->inc)
+        {
+            gen(node->inc);
+        }
+        printf("    jmp .Lbegin%03d\n", node->label);
+        printf(".Lend%03d:\n", node->label);
+        return;
     }
 
     gen(node->lhs);
