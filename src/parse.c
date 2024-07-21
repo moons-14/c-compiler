@@ -69,6 +69,7 @@ stmt = expr ";"
         | "if" "(" expr ")" stmt ("else" stmt)?
         | "while" "(" expr ")" stmt
         | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+        | "{" stmt* "}"
 expr = assign
 assign = equality ("=" assign)?
 equality = relational ("==" relational | "!=" relational)*
@@ -97,6 +98,7 @@ void *program()
 //         | "if" "(" expr ")" stmt ("else" stmt)?
 //         | "while" "(" expr ")" stmt
 //         | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//         | "{" stmt* "}"
 Node *stmt()
 {
     Node *node;
@@ -150,6 +152,18 @@ Node *stmt()
         node->inc = inc;
         node->then = body;
         return node;
+    }
+    else if (consume("{"))
+    {
+        Node *head = new_node_by_kind(ND_BLOCK);
+        Node *cur = head;
+        while (!consume("}"))
+        {
+            cur->next = stmt();
+            cur = cur->next;
+        }
+        cur->next = NULL;
+        return head;
     }
     else
     {

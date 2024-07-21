@@ -9,9 +9,9 @@ assert(){
     actual="$?"
 
     if [ "$actual" = "$expected" ]; then
-        echo "$input => $actual"
+        echo "✅ $input => $actual"
     else
-        echo "$input => $expected expected, but got $actual"
+        echo "❌ $input => $expected expected, but got $actual"
         exit 1
     fi
 }
@@ -78,5 +78,22 @@ assert 10 'a=20;while(a>10) a=a-1; return a;'
 # forが使えるように
 assert 10 'a=0;for(i=0;i<10;i=i+1) a=a+1; return a;'
 assert 10 'a=0;for(;a<10;) a=a+1; return a;'
+
+# ブロックを使えるように
+assert 10 '{10;}'
+assert 20 '{a=20;return a;}'
+assert 20 'if(1==1) {a=20;return a;} return 10;'
+
+# 複雑な式
+# 複雑な条件分岐とループの組み合わせ
+assert 38 'a=0; b=1; while(a<6) { if(a<3) b=b*2; else b=b+10; a=a+1; } return b;'
+# ネストされたif文と算術演算
+assert 140 'x=10; y=20; if(x<y) { if(y>15) { x=x*2; y=y+100; } else { x=x+5; } } else { y=y-10; } return x+y;'
+# 複数の変数を使った計算とループ
+assert 55 'sum=0; i=1; while(i<=10) { sum=sum+i; i=i+1; } return sum;'
+# 条件付きのreturn文を含むループ
+assert 128 'a=1; b=1; while(a<100) { if(b>100) return a; a=a+b; b=b*2; } return b;'
+# 複雑な算術演算と条件分岐の組み合わせ
+assert 35 'x=5; y=3; z=2; if((x+y)*z > 15) { return x*y+z*10; } else { return (x-y)*z+100; }'
 
 echo OK

@@ -54,6 +54,7 @@ typedef enum
     ND_WHILE,   // while
     ND_FOR,     // for
     ND_RETURN,  // return
+    ND_BLOCK,   // { ... }
 } NodeKind;
 
 typedef struct Node Node;
@@ -71,6 +72,7 @@ struct Node
     Node *els;      // kindがND_IF_ELSEの場合のみ、else後の実行する式
     Node *init;     // kindがND_FORの場合のみ、初期化
     Node *inc;      // kindがND_FORの場合のみ、インクリメント
+    Node *next;     // kindがND_BLOCKの場合のみ、実行する式 ネストして複数の式を持つ
     int label;      // 通し番号
 };
 
